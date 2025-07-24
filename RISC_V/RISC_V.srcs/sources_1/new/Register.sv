@@ -1,26 +1,18 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 07/23/2025 05:21:12 PM
-// Design Name: 
-// Module Name: Register
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
 module Register(
+    input  logic [31:0] reg_i,
+    input  logic        clk_i,
+    input  logic        rst_i,
+    input  logic        enable_i,
+    output logic [31:0] reg_o
+);
 
-    );
+    always_ff @(posedge clk_i) begin
+        if (rst_i)
+            reg_o<= 32'b0;     
+        else if (enable_i)
+            reg_o <= reg_i;        
+        else
+            reg_o <= reg_o;    
+    end
 endmodule
+
