@@ -3,8 +3,6 @@
 module Control_Unit(
     input  logic [31:0] instr_i,
 
-    // PC control
-    output logic        PC_en_o,
 
     // Datapath controls
     output logic [6:0]  se_sel_o,
@@ -15,6 +13,10 @@ module Control_Unit(
     output logic [4:0]  A1_addr_o,
     output logic [4:0]  A2_addr_o,
     output logic [4:0]  A3_addr_o,
+    
+    //Branch/Jump control
+    output logic        jump_o,     //signals a jump instr
+    output logic        branch_o,   //signals a brnach instruction
 
     // ALU control
     output logic [9:0]  ALU_op_o,
@@ -42,7 +44,6 @@ module Control_Unit(
         funct7 = instr_i[31:25];
     
         // Default control signal values
-        PC_en_o       = 1'b1;  // PC always enabled in pipelined
         
         // Register file controls
         A1_addr_o     = rs1;
@@ -62,6 +63,10 @@ module Control_Unit(
         
         // Data selection
         data_sel_o    = 2'bXX; // Default ALU result
+        
+        //Jump/Branch
+        jump_o = 1'b0;   
+        branch_o = 1'b0;  
 
         // Instruction decoding
         case(opcode)
@@ -99,18 +104,19 @@ module Control_Unit(
             
             // Branch instructions
             7'b1100011: begin
-                ALU_op_o = {7'b1111111, funct3};
+                ALU_op_o = {7'b1111111, funct3}; 
+                branch_o = 1'b1; 
             end
             
             // JAL
             7'b1101111: begin
                 WD3_en_o = 1'b1;     //Writeback enabled
                 data_sel_o = 2'b10;  //PC+4
+                jump_o = 1'b1;  
             end
             
             default: begin
                 // Default control signal values
-                PC_en_o       = 1'b1;  // PC always enabled in pipelined
                 
                 // Register file controls
                 A1_addr_o     = rs1;
@@ -130,6 +136,10 @@ module Control_Unit(
                 
                 // Data selection
                 data_sel_o    = 2'bXX; // Default ALU result
+                
+                //Branch/Jump
+                jump_o = 1'b0;   
+                branch_o = 1'b0; 
             end
         endcase
     end
