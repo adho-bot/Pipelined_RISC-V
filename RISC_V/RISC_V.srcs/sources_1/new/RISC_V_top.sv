@@ -9,9 +9,6 @@ module RISC_V_top(
 /*==================================================*/    
 /*              logic instantiation                 */
 /*==================================================*/  
-/*==================================================*/    
-/*              logic instantiation                 */
-/*==================================================*/  
 
 // Fetch signals
 logic add_sel_l;
@@ -31,7 +28,7 @@ logic [31:0] RD2_D_l;
 logic data_sel_D_l;
 logic WD3_en_D_l;
 logic [4:0] A3_addr_D_l;
-logic [2:0] ALU_op_D_l;
+logic [9:0] ALU_op_D_l;
 logic srcB_sel_D_l;
 logic jump_D_l;
 logic branch_D_l;
