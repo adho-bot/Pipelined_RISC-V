@@ -8,7 +8,9 @@ module decode(
     input logic [31:0] PC_old_D_i,  //from fetch
     input logic [31:0] PC_cur_D_i,   //from fetch
     
-    input logic [31:0] data_WB_i,    //from writeback
+    input logic [31:0] data_D_i,    //from writeback
+    input logic [31:0] A3_addr_D_i,  //from writeback
+    input logic [31:0] WD3_en_D_i,  //from writeback 
     
     output logic [31:0] PC_old_D_o,  //to execute
     output logic [31:0] PC_cur_D_o,   //to execute
@@ -53,10 +55,6 @@ module decode(
     
     //Control unit signals
     logic [1:0]  data_sel_l;
-    logic        WD3_en_l;
-    logic [4:0]  A1_addr_l;
-    logic [4:0]  A2_addr_l;
-    logic [4:0]  A3_addr_l;
     logic [9:0]  ALU_op_l;
     logic        srcB_sel_l;
     logic        jump_l;  
@@ -75,12 +73,12 @@ module decode(
     
     // Data inputs
     .WD3_i(data_WB_i),            // Data to be written
-    .WD3_en_i(WD3_en_l),      // Write enable
+    .WD3_en_i(WD3_en_WB_i),      // Write enable
     
     // Address inputs
     .A1_addr_i(A1_addr_l),    // Read address 1 (rs1)
     .A2_addr_i(A2_addr_l),    // Read address 2 (rs2)
-    .A3_addr_i(A3_addr_l),    // Write address (rd)
+    .A3_addr_i(A3_addr_WB_i),    // Write address (rd)
     
     // Data outputs
     .RD1_o(RD1_l),           // Read data 1 output
