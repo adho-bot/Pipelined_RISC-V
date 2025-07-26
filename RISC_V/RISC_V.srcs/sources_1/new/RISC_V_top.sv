@@ -1,9 +1,19 @@
 
 module RISC_V_top(
     input logic clk,
-    input logic rst
-
-
+    input logic rst,
+    
+    
+    //instruction memory signals 
+    input instr_i,
+    output logic PC_old_o,
+    
+    //data memory signals
+    input logic [31:0] data_mem_out_M_i,
+    output logic [31:0] RD2_M_o,
+    output logic mem_wr_M_o,
+    output logic mem_rd_M_o,
+    output logic [31:0] address_M_o
     );
     
 /*==================================================*/    
@@ -13,10 +23,8 @@ module RISC_V_top(
 // Fetch signals
 logic add_sel_l;
 logic [31:0] branch_target_E_l;
-logic [31:0] instr_l;
 logic [31:0] PC_old_l;
 logic [31:0] PC_cur_l;
-logic [31:0] instr_F_l;
 
 // Decode signals
 logic [31:0] instr_F_l;
@@ -50,16 +58,15 @@ logic [31:0] PC_cur_E_l;
 logic [31:0] branch_target_E_l;
 
 // Memory signals
-logic [31:0] RD2_M_o_l;
-logic [31:0] address_M_o_l;
-logic mem_rd_M_o_l;
-logic mem_wr_M_o_l;
-logic [31:0] PC_cur_M_o_l;
-logic [31:0] ALU_M_o_l;
-logic data_sel_M_o_l;
-logic WD3_en_M_o_l;
-logic [4:0] A3_addr_M_o_l;
-logic [31:0] data_read_M_o_l;
+logic [31:0] RD2_M_l;
+logic [31:0] address_M_l;
+logic mem_rd_M_l;
+logic mem_wr_M_l;
+logic [31:0] PC_cur_M_l;
+logic [31:0] ALU_M_l;
+logic data_sel_M_l;
+logic WD3_en_M_l;
+logic [4:0] A3_addr_M_l;
 logic [31:0] data_read_M_l;
 
 // Writeback signals
@@ -80,7 +87,7 @@ logic [4:0] A3_addr_WB_l;
         //Datapath Singals
         .add_sel_i(add_sel_l),          // Multiplexer select                   //
         .branch_target_i(branch_target_E_l),  // Branch calculation value       //
-        .instr_i(instr_l),              // Instruction from memory          <-
+        .instr_i(instr_i),              // Instruction from memory          <-
         .PC_old_F_o(PC_old_l),            // Old program counter output     <-    //
         .PC_cur_F_o(PC_cur_l),            // Current PC value                   //
         .instr_F_o(instr_F_l)               // Instruction output                 //
@@ -91,12 +98,16 @@ logic [4:0] A3_addr_WB_l;
     
  //Instruction memory
  
+ 
+ assign PC_old_o = PC_old_l;
+ 
+ /*
 instruction_memory instruction_memory_inst(
     .clk(clk),
     .address_i(PC_old_l),
     .instruction_o(instr_l)
     );
-
+*/
 /*==================================================*/    
 /*                     Decode                       */
 /*==================================================*/   
@@ -194,33 +205,38 @@ instruction_memory instruction_memory_inst(
         .RD2_M_i(RD2_E_l),
         .ALU_M_i(ALU_E_l),
         .PC_cur_M_i(PC_cur_E_l),
-        .data_read_M_i(data_read_M_l),  // This connects to data memory output <-
+        .data_read_M_i(data_mem_out_M_i),  // This connects to data memory output <- 
         
         // Memory interface outputs
-        .RD2_M_o(RD2_M_o_l),            //<- 
-        .address_M_o(address_M_o_l),    //<- 
-        .mem_rd_M_o(mem_rd_M_o_l),      //<-     
-        .mem_wr_M_o(mem_wr_M_o_l),      //<-
+        .RD2_M_o(RD2_M_l),            //<- 
+        .address_M_o(address_M_l),    //<- 
+        .mem_rd_M_o(mem_rd_M_l),      //<-     
+        .mem_wr_M_o(mem_wr_M_l),      //<-
         
         // Pipeline outputs (to writeback)
-        .PC_cur_M_o(PC_cur_M_o_l),
-        .ALU_M_o(ALU_M_o_l),
-        .data_sel_M_o(data_sel_M_o_l),
-        .WD3_en_M_o(WD3_en_M_o_l),
-        .A3_addr_M_o(A3_addr_M_o_l),
-        .data_read_M_o(data_read_M_o_l)
+        .PC_cur_M_o(PC_cur_M_l),
+        .ALU_M_o(ALU_M_l),
+        .data_sel_M_o(data_sel_M_l),
+        .WD3_en_M_o(WD3_en_M_l),
+        .A3_addr_M_o(A3_addr_M_l),
+        .data_read_M_o(data_read_M_l)  //data memory output pipelined
     );    
     
+  assign RD2_M_o = RD2_M_l;
+  assign mem_wr_M_o = mem_wr_M_l;
+  assign mem_rd_M_o = mem_rd_M_l;
+  assign address_M_o = address_M_l;
+/*    
     data_memory data_memory_inst(
     .clk(clk),
-    .address_i(address_M_o_l),  
-    .data_i(RD2_M_o_l),     
-    .data_wr(mem_wr_M_o_l),           
-    .data_rd(mem_rd_M_o_l),         
-    
-    .data_o(data_read_M_l)  
+    .address_i(address_M_l),  
+    .data_i(RD2_M_l),     
+    .data_wr(mem_wr_M_l),           
+    .data_rd(mem_rd_M_l),         
+
+    .data_o(data_mem_out_M_l)  
 );
-    
+*/    
 /*==================================================*/    
 /*                     Writeback                    */
 /*==================================================*/ 
@@ -230,12 +246,12 @@ instruction_memory instruction_memory_inst(
         .rst(rst),
         
         // Inputs from memory stage
-        .PC_cur_WB_i(PC_cur_M_o_l),
-        .ALU_WB_i(ALU_M_o_l),
-        .data_sel_WB_i(data_sel_M_o_l),
-        .WD3_en_WB_i(WD3_en_M_o_l),
-        .A3_addr_WB_i(A3_addr_M_o_l),
-        .data_read_WB_i(data_read_M_o_l),
+        .PC_cur_WB_i(PC_cur_M_l),
+        .ALU_WB_i(ALU_M_l),
+        .data_sel_WB_i(data_sel_M_l),
+        .WD3_en_WB_i(WD3_en_M_l),
+        .A3_addr_WB_i(A3_addr_M_l),
+        .data_read_WB_i(data_read_M_l),
         
         // Outputs
         .data_WB_o(data_WB_l),
