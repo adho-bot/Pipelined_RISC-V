@@ -55,7 +55,6 @@ logic c_status_E_l;
 logic [31:0] RD2_E_l;
 logic [31:0] ALU_E_l;
 logic [31:0] PC_cur_E_l;
-logic [31:0] branch_target_E_l;
 
 // Memory signals
 logic [31:0] RD2_M_l;
