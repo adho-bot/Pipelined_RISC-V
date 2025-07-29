@@ -72,13 +72,13 @@ module decode(
     .rst(rst),                // Keep direct connection for reset
     
     // Data inputs
-    .WD3_i(data_WB_i),            // Data to be written
-    .WD3_en_i(WD3_en_WB_i),      // Write enable
+    .WD3_i(data_D_i),            // Data to be written
+    .WD3_en_i(WD3_en_D_i),      // Write enable
     
     // Address inputs
     .A1_addr_i(A1_addr_l),    // Read address 1 (rs1)
     .A2_addr_i(A2_addr_l),    // Read address 2 (rs2)
-    .A3_addr_i(A3_addr_WB_i),    // Write address (rd)
+    .A3_addr_i(A3_addr_D_i),    // Write address (rd)
     
     // Data outputs
     .RD1_o(RD1_l),           // Read data 1 output
@@ -122,7 +122,7 @@ module decode(
         RD1_D_o <= RD1_l;
         RD2_D_o <= RD2_l;
         sign_ext_D_o <= sign_ext_o_l;
-        PC_cur_D_o <= PC_old_D_i;
+        PC_old_D_o <= PC_old_D_i;
         PC_cur_D_o <= PC_cur_D_i;
         
         // Control Signals

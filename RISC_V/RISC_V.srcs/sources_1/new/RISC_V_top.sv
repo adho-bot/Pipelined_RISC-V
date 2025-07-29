@@ -5,8 +5,8 @@ module RISC_V_top(
     
     
     //instruction memory signals 
-    input instr_i,
-    output logic PC_old_o,
+    input logic [31:0] instr_i,
+    output logic [31:0] PC_old_o,
     
     //data memory signals
     input logic [31:0] data_mem_out_M_i,
@@ -33,7 +33,7 @@ logic [31:0] PC_cur_D_l;
 logic [31:0] sign_ext_D_l;
 logic [31:0] RD1_D_l;
 logic [31:0] RD2_D_l;
-logic data_sel_D_l;
+logic [1:0] data_sel_D_l;
 logic WD3_en_D_l;
 logic [4:0] A3_addr_D_l;
 logic [9:0] ALU_op_D_l;
@@ -44,7 +44,7 @@ logic mem_rd_D_l;
 logic mem_wr_D_l;
 
 // Execute signals
-logic data_sel_E_l;
+logic [1:0] data_sel_E_l;
 logic WD3_en_E_l;
 logic [4:0] A3_addr_E_l;
 logic jump_E_l;
@@ -55,7 +55,6 @@ logic c_status_E_l;
 logic [31:0] RD2_E_l;
 logic [31:0] ALU_E_l;
 logic [31:0] PC_cur_E_l;
-
 // Memory signals
 logic [31:0] RD2_M_l;
 logic [31:0] address_M_l;
@@ -63,7 +62,7 @@ logic mem_rd_M_l;
 logic mem_wr_M_l;
 logic [31:0] PC_cur_M_l;
 logic [31:0] ALU_M_l;
-logic data_sel_M_l;
+logic [1:0] data_sel_M_l;
 logic WD3_en_M_l;
 logic [4:0] A3_addr_M_l;
 logic [31:0] data_read_M_l;
