@@ -106,13 +106,15 @@ module Control_Unit(
             7'b1100011: begin
                 ALU_op_o = {7'b1111111, funct3}; 
                 branch_o = 1'b1; 
+                srcB_sel_o = 1'b1;
             end
             
             // JAL
             7'b1101111: begin
                 WD3_en_o = 1'b1;     //Writeback enabled
                 data_sel_o = 2'b10;  //PC+4
-                jump_o = 1'b1;  
+                jump_o = 1'b1;
+                srcB_sel_o = 1'b1;                
             end
             
             default: begin
