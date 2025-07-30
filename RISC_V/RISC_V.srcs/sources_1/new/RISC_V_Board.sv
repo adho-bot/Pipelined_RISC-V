@@ -11,7 +11,7 @@ module RISC_V_Board(
 /*==================================================*/     
     
 logic [31:0] instr_l;          // Instruction from instruction memory
-logic [31:0] PC_old_l;         // PC address to instruction memory
+logic [31:0] instr_address_o;         // PC address to instruction memory
 
 // Data memory interface signals
 logic [31:0] data_read_M_l;    // Data read from data memory
@@ -27,7 +27,7 @@ RISC_V_top risc_v_top_inst (
     
     // Instruction memory interface
     .instr_i(instr_l),        
-    .PC_old_o(PC_old_l),       
+    .instr_address_o(instr_address_o),       
     
     // Data memory interface
     .data_mem_out_M_i(data_read_M_l),  
@@ -39,7 +39,7 @@ RISC_V_top risc_v_top_inst (
     
 instruction_memory instruction_memory_inst(
     .clk(clk),
-    .address_i(PC_old_l),
+    .address_i(instr_address_o),
     .instruction_o(instr_l)
 );
     

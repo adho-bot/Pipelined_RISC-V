@@ -6,7 +6,7 @@ module RISC_V_top(
     
     //instruction memory signals 
     input logic [31:0] instr_i,
-    output logic [31:0] PC_old_o,
+    output logic [31:0] instr_address_o,
     
     //data memory signals
     input logic [31:0] data_mem_out_M_i,
@@ -88,17 +88,14 @@ logic [4:0] A3_addr_WB_l;
         .instr_i(instr_i),              // Instruction from memory          <-
         .PC_old_F_o(PC_old_l),            // Old program counter output     <-    //
         .PC_cur_F_o(PC_cur_l),            // Current PC value                   //
-        .instr_F_o(instr_F_l)               // Instruction output                 //
+        .instr_F_o(instr_F_l),          // Instruction output                 //
+        .instr_address_o(instr_address_o)
   );
   
   //Jump/Branch decision logic
     assign add_sel_l = jump_E_l | (c_status_E_l & branch_E_l);
     
- //Instruction memory
- 
- 
- assign PC_old_o = PC_old_l;
- 
+
  /*
 instruction_memory instruction_memory_inst(
     .clk(clk),

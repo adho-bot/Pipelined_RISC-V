@@ -7,7 +7,8 @@ module fetch(
     input logic  [31:0] instr_i,            //insturction from memory
     output logic [31:0] PC_old_F_o,           //Old program counter output   PC -> Instruction memory
     output logic [31:0] PC_cur_F_o,           //Current PC value 
-    output logic [31:0] instr_F_o             //Instruction output
+    output logic [31:0] instr_F_o,         //Instruction output
+    output logic [31:0] instr_address_o
     );
     
 /*==================================================*/    
@@ -31,7 +32,8 @@ Register PC(
     .reg_o(PC_o_l)         //Output from PC
  );
     
-   
+    //Insturction memory address
+    assign instr_address_o = PC_o_l;
     
     //Adder output
     assign PC_cur_l = PC_o_l + 32'd4;
@@ -39,13 +41,19 @@ Register PC(
     //Multiplexer Select Output
     assign PC_i_l = (add_sel_i) ?  branch_target_i : PC_cur_l;
     
-    always_ff @(posedge clk) begin
-        //PC_output to address
-        PC_old_F_o <= PC_o_l;
-        PC_cur_F_o <= PC_cur_l;
-        
-        //Assign insturction in to insturction out
-        instr_F_o <= instr_i;
+    always_ff @(posedge clk or posedge rst) begin
+        if(rst)  begin
+            PC_old_F_o <= 32'hX;
+            PC_cur_F_o <= 32'hX;
+            instr_F_o <= 32'hX;
+        end else begin
+            //PC_output to address
+            PC_old_F_o <= PC_o_l;
+            PC_cur_F_o <= PC_cur_l;
+            
+            //Assign insturction in to insturction out
+            instr_F_o <= instr_i;
+        end
     end
 
     
