@@ -62,7 +62,7 @@ module Control_Unit(
         se_sel_o      = opcode;
         
         // Data selection
-        data_sel_o    = 2'bXX; // Default ALU result
+        data_sel_o    = 2'b00; // Default ALU result
         
         //Jump/Branch
         jump_o = 1'b0;   

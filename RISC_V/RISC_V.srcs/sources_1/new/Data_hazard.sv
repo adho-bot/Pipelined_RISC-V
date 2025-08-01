@@ -11,6 +11,8 @@ module Data_hazard(
     input logic [6:0] prev_instr_op_i,   // previous instruction opcode (in Execute)
     input logic [4:0] prev_instr_rd_i,   // previous instruction destination register
     
+    input logic       stall_en_i,       // To check if lw is in action
+        
     output logic stall_D_o,
     output logic flush_E_o,
      
@@ -29,10 +31,9 @@ always_comb begin
     if ((prev_instr_op_i == `OP_R_TYPE) || (prev_instr_op_i == `OP_I_TYPE) || (prev_instr_op_i == `OP_LOAD)) begin    //0
         // Check if next instruction uses the destination register of previous instruction
         if (next_instr_op_i != `OP_JAL) begin  //jal is the only one without rs1 and rs2(will add more insturctions like this in the future
-        
             // Check for RS1 dependency (for instructions with rs1)
             if (next_instr_rs1_i == prev_instr_rd_i && next_instr_rs1_i != 0) begin //2
-                if (prev_instr_op_i == `OP_LOAD) begin //4
+                if (prev_instr_op_i == `OP_LOAD && stall_en_i) begin //4
                     // Load-Use Hazard: Need to stall
                     stall_D_o = 1'b1;
                     flush_E_o = 1'b1;
@@ -45,7 +46,7 @@ always_comb begin
             
             // Check for RS2 dependency (only for instructions with rs2 as well)
             if ((next_instr_op_i == `OP_R_TYPE || next_instr_op_i == `OP_B_TYPE || next_instr_op_i == `OP_STORE ) && (next_instr_rs2_i == prev_instr_rd_i) && (next_instr_rs2_i != 0)) begin //3 //check for RD2 dependency in R type
-                if (prev_instr_op_i == `OP_LOAD) begin //5
+                if (prev_instr_op_i == `OP_LOAD && stall_en_i) begin //5
                     // Load-Use Hazard: Need to stall
                     stall_D_o = 1'b1;
                     flush_E_o = 1'b1;

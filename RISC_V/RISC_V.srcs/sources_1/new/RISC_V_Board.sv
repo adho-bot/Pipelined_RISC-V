@@ -49,7 +49,8 @@ RISC_V_top risc_v_top_inst (
     .RD1_sel_i(RD1_sel_l),  
     .RD2_sel_i(RD2_sel_l),  
     .flush_E_i(flush_E_l),  
-    .stall_D_i(stall_D_l)  
+    .stall_D_i(stall_D_l),
+    .stall_en_o(stall_en_1)  
 );
     
 instruction_memory instruction_memory_inst(
@@ -77,6 +78,7 @@ Hazard_unit hazard_unit_inst (
 
     .instruction_D_i(instr_DH_o),            //From RISCV top
     .instruction_F_i(instr_FH_o),            //FRom RISCV top
+    .stall_en_i(stall_en_l),
 
 
     .RD1_sel_o(RD1_sel_l),  

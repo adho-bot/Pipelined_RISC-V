@@ -22,7 +22,8 @@ module RISC_V_top(
     input logic [1:0] RD1_sel_i,  
     input logic [1:0] RD2_sel_i,  
     input logic       flush_E_i,  
-    input logic       stall_D_i 
+    input logic       stall_D_i, 
+    output logic      stall_en_o
     
     );
     
@@ -109,7 +110,7 @@ logic [4:0] A3_addr_WB_l;
         .instr_address_o(instr_address_o),
         
         //Hazard signals
-        .stall_D_i(1'b0)//stall_D_i
+        .stall_D_i(stall_D_i)//stall_D_i
   );
   
   //Jump/Branch decision logic
@@ -159,9 +160,11 @@ instruction_memory instruction_memory_inst(
         .mem_wr_D_o(mem_wr_D_l),         //data memory write enable              //)
         
         //Hazard signals
-        .flush_E_i(1'b0),//flush_E_i
+        .flush_E_i(flush_E_i),//flush_E_i
         .instr_D_o(instr_DH_o)
 );
+
+assign stall_en_o = data_sel_D_l[0];
      
     
 /*==================================================*/    

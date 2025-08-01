@@ -122,26 +122,26 @@ module decode(
 /*              Pipeline Logic                      */
 /*==================================================*/
 
-    always_ff @(posedge clk or posedge flush_E_i) begin
+    always_ff @(posedge clk) begin
         if(flush_E_i) begin
             //Datapath Signals 
-            RD1_D_o <= 32'hX;
-            RD2_D_o <= 32'hX;
+            RD1_D_o <= 32'd0;
+            RD2_D_o <= 32'd0;
             sign_ext_D_o <= 32'hX;
             PC_old_D_o <= 32'hX;
             PC_cur_D_o <= 32'hX;
             
             // Control Signals
-            data_sel_D_o <= 2'hX;
-            WD3_en_D_o  <= 1'hX;
+            data_sel_D_o <= 2'h00;
+            WD3_en_D_o  <= 1'h0;
             A3_addr_D_o <= 5'hX;
-            ALU_op_D_o  <= 10'hX;
-            srcB_sel_D_o <= 1'hX;
-            jump_D_o <= 1'hX; 
-            branch_D_o <= 1'hX;
-            mem_rd_D_o  <= 1'hX;
-            mem_wr_D_o  <= 1'hX;
-            instr_D_o <= 32'hX;
+            ALU_op_D_o  <= 10'd0;
+            srcB_sel_D_o <= 1'b0;
+            jump_D_o <= 1'b0; 
+            branch_D_o <= 1'b0;
+            mem_rd_D_o  <= 1'b0;
+            mem_wr_D_o  <= 1'b0;
+            instr_D_o <= 32'd0;
         end else begin
             //Datapath Signals 
             RD1_D_o <= RD1_l;

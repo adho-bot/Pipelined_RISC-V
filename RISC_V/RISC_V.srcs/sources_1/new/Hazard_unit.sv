@@ -12,13 +12,19 @@ module Hazard_unit(
     input logic clk,
     input logic rst,
     
+    
+    //Data hazard signals
     input logic [31:0]  instruction_D_i,
     input logic [31:0]  instruction_F_i,
+    
+    input logic         stall_en_i,
     
     output logic [1:0] RD1_sel_o,
     output logic [1:0] RD2_sel_o,
     output logic       flush_E_o,
     output logic       stall_D_o
+    
+    //Control Hazard signals
 
     );
 
@@ -28,7 +34,7 @@ logic [6:0] next_instr_op_l;
 logic [6:0] prev_instr_op_l;
 logic [4:0] prev_instr_rd_l;
 
-logic [1:0] RD1_sel_l, RD2_sel_l;
+logic [1:0] RD1_sel_l, RD2_sel_l, RD2_sel_li, RD1_sel_li;
 
 Data_hazard data_hazard_inst (
 
@@ -43,8 +49,11 @@ Data_hazard data_hazard_inst (
     .stall_D_o(stall_D_o),
     .flush_E_o(flush_E_o),
     .RD1_sel_o(RD1_sel_l),
-    .RD2_sel_o(RD2_sel_l)
+    .RD2_sel_o(RD2_sel_l),
+    .stall_en_i(stall_en_i)
 );
+
+
 
 //Data hazard instruction partioning
 assign next_instr_rs2_l = instruction_F_i[24:20];
@@ -53,10 +62,12 @@ assign next_instr_op_l  = instruction_F_i[6:0];
 assign prev_instr_op_l  = instruction_D_i[6:0];
 assign prev_instr_rd_l  = instruction_D_i[11:7];
 
+logic [1:0] RD1_sel_held, RD2_sel_held;  // Temporary holding registers
+
 always_ff @(posedge clk or posedge rst) begin
     if(rst) begin
         RD1_sel_o <= 2'hX;
-        RD2_sel_o <= 2'hX;    
+        RD2_sel_o <= 2'hX;       
     end else begin
         RD1_sel_o <= RD1_sel_l;
         RD2_sel_o <= RD2_sel_l;
