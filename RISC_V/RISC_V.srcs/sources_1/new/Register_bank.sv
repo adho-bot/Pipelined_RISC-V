@@ -13,6 +13,8 @@ module Register_bank(
     logic [31:0] register [0:31];
 
     // Asynchronous Read. 0 for x0 register
+    
+    
     assign RD1_o = (A1_addr_i == 5'b00000) ? 32'd0 : register[A1_addr_i];
     assign RD2_o = (A2_addr_i == 5'b00000) ? 32'd0 : register[A2_addr_i];
 

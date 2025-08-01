@@ -9,8 +9,8 @@ module decode(
     input logic [31:0] PC_cur_D_i,   //from fetch
     
     input logic [31:0] data_D_i,    //from writeback
-    input logic [31:0] A3_addr_D_i,  //from writeback
-    input logic [31:0] WD3_en_D_i,  //from writeback 
+    input logic [4:0]  A3_addr_D_i,  //from writeback
+    input logic        WD3_en_D_i,  //from writeback 
     
     output logic [31:0] PC_old_D_o,  //to execute
     output logic [31:0] PC_cur_D_o,   //to execute
@@ -19,6 +19,7 @@ module decode(
     
     output logic [31:0] RD1_D_o,  //to execute
     output logic [31:0] RD2_D_o,   //to execute
+    
     
 //Control Signals     
 
@@ -34,7 +35,11 @@ module decode(
     output logic        branch_D_o,
 
     output logic        mem_rd_D_o,
-    output logic        mem_wr_D_o
+    output logic        mem_wr_D_o,
+    
+//Hazard signals
+    input logic         flush_E_i,
+    output logic [31:0] instr_D_o
 
 );
 
@@ -117,26 +122,45 @@ module decode(
 /*              Pipeline Logic                      */
 /*==================================================*/
 
-    always_ff @(posedge clk) begin
-        //Datapath Signals 
-        RD1_D_o <= RD1_l;
-        RD2_D_o <= RD2_l;
-        sign_ext_D_o <= sign_ext_o_l;
-        PC_old_D_o <= PC_old_D_i;
-        PC_cur_D_o <= PC_cur_D_i;
-        
-        // Control Signals
-        data_sel_D_o <= data_sel_l;
-        WD3_en_D_o  <= WD3_en_l;
-        A3_addr_D_o <= A3_addr_l;
-        ALU_op_D_o  <= ALU_op_l;
-        srcB_sel_D_o <= srcB_sel_l;
-        jump_D_o <= jump_l; 
-        branch_D_o <= branch_l;
-        mem_rd_D_o  <= mem_rd_l;
-        mem_wr_D_o  <= mem_wr_l;
-        
-        
+    always_ff @(posedge clk or posedge flush_E_i) begin
+        if(flush_E_i) begin
+            //Datapath Signals 
+            RD1_D_o <= 32'hX;
+            RD2_D_o <= 32'hX;
+            sign_ext_D_o <= 32'hX;
+            PC_old_D_o <= 32'hX;
+            PC_cur_D_o <= 32'hX;
+            
+            // Control Signals
+            data_sel_D_o <= 2'hX;
+            WD3_en_D_o  <= 1'hX;
+            A3_addr_D_o <= 5'hX;
+            ALU_op_D_o  <= 10'hX;
+            srcB_sel_D_o <= 1'hX;
+            jump_D_o <= 1'hX; 
+            branch_D_o <= 1'hX;
+            mem_rd_D_o  <= 1'hX;
+            mem_wr_D_o  <= 1'hX;
+            instr_D_o <= 32'hX;
+        end else begin
+            //Datapath Signals 
+            RD1_D_o <= RD1_l;
+            RD2_D_o <= RD2_l;
+            sign_ext_D_o <= sign_ext_o_l;
+            PC_old_D_o <= PC_old_D_i;
+            PC_cur_D_o <= PC_cur_D_i;
+            
+            // Control Signals
+            data_sel_D_o <= data_sel_l;
+            WD3_en_D_o  <= WD3_en_l;
+            A3_addr_D_o <= A3_addr_l;
+            ALU_op_D_o  <= ALU_op_l;
+            srcB_sel_D_o <= srcB_sel_l;
+            jump_D_o <= jump_l; 
+            branch_D_o <= branch_l;
+            mem_rd_D_o  <= mem_rd_l;
+            mem_wr_D_o  <= mem_wr_l;
+            instr_D_o <= instr_D_i;
+        end
     end
-
 endmodule 

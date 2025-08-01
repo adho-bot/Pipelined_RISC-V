@@ -67,6 +67,8 @@ module Control_Unit(
         //Jump/Branch
         jump_o = 1'b0;   
         branch_o = 1'b0;  
+        
+        ALU_op_o = 10'hX;
 
         // Instruction decoding
         case(opcode)
@@ -115,33 +117,6 @@ module Control_Unit(
                 data_sel_o = 2'b10;  //PC+4
                 jump_o = 1'b1;
                 srcB_sel_o = 1'b1;                
-            end
-            
-            default: begin
-                // Default control signal values
-                
-                // Register file controls
-                A1_addr_o     = rs1;
-                A2_addr_o     = rs2;
-                A3_addr_o     = rd;
-                WD3_en_o      = 1'b0;  // Default no writeback
-                
-                // ALU controls
-                srcB_sel_o    = 1'bX;  // Default rs2
-                
-                // Memory controls
-                mem_rd_o      = 1'b0;
-                mem_wr_o      = 1'b0;
-                
-                // Sign extension
-                se_sel_o      = opcode;
-                
-                // Data selection
-                data_sel_o    = 2'bXX; // Default ALU result
-                
-                //Branch/Jump
-                jump_o = 1'b0;   
-                branch_o = 1'b0; 
             end
         endcase
     end

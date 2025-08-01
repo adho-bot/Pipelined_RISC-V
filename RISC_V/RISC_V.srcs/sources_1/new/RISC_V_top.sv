@@ -5,15 +5,25 @@ module RISC_V_top(
     
     
     //instruction memory signals 
-    input logic [31:0] instr_i,
+    input logic [31:0] instr_i,           //fetch stage instruction
     output logic [31:0] instr_address_o,
+    output logic [31:0] instr_DH_o,          //execution stage instruction to hazard unit
+    output logic [31:0] instr_FH_o,          //decode stage instruction to hazard unit
     
     //data memory signals
-    input logic [31:0] data_mem_out_M_i,
+    input logic  [31:0] data_mem_out_M_i,
     output logic [31:0] RD2_M_o,
-    output logic mem_wr_M_o,
-    output logic mem_rd_M_o,
-    output logic [31:0] address_M_o
+    output logic        mem_wr_M_o,
+    output logic        mem_rd_M_o,
+    output logic [31:0] address_M_o,
+    
+    //hazard signals
+    
+    input logic [1:0] RD1_sel_i,  
+    input logic [1:0] RD2_sel_i,  
+    input logic       flush_E_i,  
+    input logic       stall_D_i 
+    
     );
     
 /*==================================================*/    
@@ -25,6 +35,8 @@ logic add_sel_l;
 logic [31:0] branch_target_E_l;
 logic [31:0] PC_old_l;
 logic [31:0] PC_cur_l;
+
+logic        stall_D_l1;
 
 // Decode signals
 logic [31:0] instr_F_l;
@@ -55,9 +67,11 @@ logic c_status_E_l;
 logic [31:0] RD2_E_l;
 logic [31:0] ALU_E_l;
 logic [31:0] PC_cur_E_l;
+
+
+logic       flush_E_l1;
 // Memory signals
 logic [31:0] RD2_M_l;
-logic [31:0] address_M_l;
 logic mem_rd_M_l;
 logic mem_wr_M_l;
 logic [31:0] PC_cur_M_l;
@@ -73,7 +87,10 @@ logic WD3_en_WB_l;
 logic [4:0] A3_addr_WB_l;
 
  
+ //Hazard
  
+ logic [31:0] MEM_FWD_WB_l;
+ logic [31:0] ALU_FWD_M_l;
 /*==================================================*/    
 /*                     Fetch                        */
 /*==================================================*/   
@@ -89,12 +106,17 @@ logic [4:0] A3_addr_WB_l;
         .PC_old_F_o(PC_old_l),            // Old program counter output     <-    //
         .PC_cur_F_o(PC_cur_l),            // Current PC value                   //
         .instr_F_o(instr_F_l),          // Instruction output                 //
-        .instr_address_o(instr_address_o)
+        .instr_address_o(instr_address_o),
+        
+        //Hazard signals
+        .stall_D_i(1'b0)//stall_D_i
   );
   
   //Jump/Branch decision logic
     assign add_sel_l = jump_E_l | (c_status_E_l & branch_E_l);
     
+  //Decode stage instruction  
+  assign instr_FH_o = instr_F_l;
 
  /*
 instruction_memory instruction_memory_inst(
@@ -134,8 +156,13 @@ instruction_memory instruction_memory_inst(
         .jump_D_o(jump_D_l),                                                    //
         .branch_D_o(branch_D_l),                                                //
         .mem_rd_D_o(mem_rd_D_l),        //data memory read enable               //
-        .mem_wr_D_o(mem_wr_D_l)         //data memory write enable              //
+        .mem_wr_D_o(mem_wr_D_l),         //data memory write enable              //)
+        
+        //Hazard signals
+        .flush_E_i(1'b0),//flush_E_i
+        .instr_D_o(instr_DH_o)
 );
+     
     
 /*==================================================*/    
 /*                     Execute                      */
@@ -177,7 +204,14 @@ instruction_memory instruction_memory_inst(
         .RD2_E_o(RD2_E_l),
         .ALU_E_o(ALU_E_l),
         .PC_cur_E_o(PC_cur_E_l),
-        .branch_target_E_o(branch_target_E_l)
+        .branch_target_E_o(branch_target_E_l),
+        
+        //Hazard
+        .RD1_sel_i(RD1_sel_i),
+        .RD2_sel_i(RD2_sel_i),
+        
+        .ALU_E_i(ALU_FWD_M_l),
+        .MEM_E_i(MEM_FWD_WB_l)
 );
     
     
@@ -204,7 +238,7 @@ instruction_memory instruction_memory_inst(
         
         // Memory interface outputs
         .RD2_M_o(RD2_M_l),            //<- 
-        .address_M_o(address_M_l),    //<- 
+        .address_M_o(address_M_o),    //<- 
         .mem_rd_M_o(mem_rd_M_l),      //<-     
         .mem_wr_M_o(mem_wr_M_l),      //<-
         
@@ -214,24 +248,17 @@ instruction_memory instruction_memory_inst(
         .data_sel_M_o(data_sel_M_l),
         .WD3_en_M_o(WD3_en_M_l),
         .A3_addr_M_o(A3_addr_M_l),
-        .data_read_M_o(data_read_M_l)  //data memory output pipelined
+        .data_read_M_o(data_read_M_l),  //data memory output pipelined
+        
+        //Hazard
+        .ALU_FWD_M_o(ALU_FWD_M_l)
+
     );    
     
   assign RD2_M_o = RD2_M_l;
   assign mem_wr_M_o = mem_wr_M_l;
   assign mem_rd_M_o = mem_rd_M_l;
-  assign address_M_o = address_M_l;
-/*    
-    data_memory data_memory_inst(
-    .clk(clk),
-    .address_i(address_M_l),  
-    .data_i(RD2_M_l),     
-    .data_wr(mem_wr_M_l),           
-    .data_rd(mem_rd_M_l),         
 
-    .data_o(data_mem_out_M_l)  
-);
-*/    
 /*==================================================*/    
 /*                     Writeback                    */
 /*==================================================*/ 
@@ -251,7 +278,10 @@ instruction_memory instruction_memory_inst(
         // Outputs
         .data_WB_o(data_WB_l),
         .WD3_en_WB_o(WD3_en_WB_l),
-        .A3_addr_WB_o(A3_addr_WB_l)
+        .A3_addr_WB_o(A3_addr_WB_l),
+        
+        //Hazard
+        .MEM_FWD_WB_o(MEM_FWD_WB_l)
   );
     
     

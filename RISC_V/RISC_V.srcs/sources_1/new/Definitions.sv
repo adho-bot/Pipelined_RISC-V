@@ -18,7 +18,16 @@
 `define BLT     	10'b1111111_100
 `define BGE     	10'b1111111_101
 
+/*------------------------------------------------------------------------------------------*/
+/*                                Instruction Opcodes                                      */
+/*------------------------------------------------------------------------------------------*/
 
+`define OP_R_TYPE       7'b0110011 // Addition
+`define OP_I_TYPE       7'b0010011 // Subtraction
+`define OP_JAL          7'b1101111 // Shift left logical
+`define OP_B_TYPE     	7'b1100011 // Xor
+`define OP_LOAD         7'b0000011 // Shift right logical
+`define OP_STORE        7'b0100011 // Shift right arithmetic
 
 
 

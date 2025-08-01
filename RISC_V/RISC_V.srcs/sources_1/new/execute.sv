@@ -47,9 +47,16 @@ module execute (
     output logic [31:0] RD2_E_o,
     output logic [31:0] ALU_E_o,
     output logic [31:0] PC_cur_E_o,
-    output logic [31:0] branch_target_E_o
+    output logic [31:0] branch_target_E_o,
     
+    //Hazard
     
+    input logic  [1:0] RD1_sel_i,
+    input logic  [1:0] RD2_sel_i,
+    
+    input logic  [31:0] ALU_E_i,
+    input logic  [31:0] MEM_E_i
+   
 );
 
 /*==================================================*/    
@@ -60,7 +67,10 @@ module execute (
     logic        c_status_l;
     logic [31:0] ALU_out_l;
 
-
+    //Hazard
+    logic [31:0]  RD2_E_l;
+    logic [31:0]  RD1_E_l;
+    
 //ALU
     ALU ALU_inst(
     .ALU_op_i(ALU_op_E_i),
@@ -70,8 +80,30 @@ module execute (
     .ALU_out_o(ALU_out_l)
     );
 
-assign SrcA_l = RD1_E_i;
-assign SrcB_l = (srcB_sel_E_i) ? sign_ext_E_i : RD2_E_i;   //Assign 2nd inpput to either data from sign extend or register
+
+//RD1 Selection
+always_comb begin
+    case(RD1_sel_i)
+    2'b00: RD1_E_l = RD1_E_i;
+    2'b01: RD1_E_l = ALU_E_i;
+    2'b10: RD1_E_l = MEM_E_i;
+    default:RD1_E_l = RD1_E_i;
+    
+    endcase
+end
+
+//RD2 Selction
+always_comb begin
+    case(RD2_sel_i)
+    2'b00: RD2_E_l = RD2_E_i;
+    2'b01: RD2_E_l = ALU_E_i;
+    2'b10: RD2_E_l = MEM_E_i;
+    default: RD2_E_l = RD2_E_i;     
+    endcase
+end
+
+assign SrcA_l = RD1_E_l;
+assign SrcB_l = (srcB_sel_E_i) ? sign_ext_E_i : RD2_E_l;   //Assign 2nd inpput to either data from sign extend or register
 
 //Branch Offset Adder 
 
@@ -86,21 +118,14 @@ assign c_status_E_o = c_status_l;
 /*==================================================*/
 
 
-always_ff @(posedge clk) begin
-//control
-    data_sel_E_o <=  data_sel_E_i; 
-    WD3_en_E_o  <= WD3_en_E_i;
-    A3_addr_E_o <= A3_addr_E_i;       
-    mem_rd_E_o  <= mem_rd_E_i;
-    mem_wr_E_o  <=  mem_wr_E_i;
-    RD2_E_o <=  RD2_E_i;
-    ALU_E_o <= ALU_out_l;
-    PC_cur_E_o <= PC_cur_E_i;
-end 
-
-
-//
-
-
-
+always_ff @(posedge clk) begin      
+            data_sel_E_o <=  data_sel_E_i; 
+            WD3_en_E_o  <= WD3_en_E_i;
+            A3_addr_E_o <= A3_addr_E_i;       
+            mem_rd_E_o  <= mem_rd_E_i;
+            mem_wr_E_o  <=  mem_wr_E_i;
+            RD2_E_o <=  RD2_E_l;
+            ALU_E_o <= ALU_out_l;
+            PC_cur_E_o <= PC_cur_E_i;
+    end 
 endmodule

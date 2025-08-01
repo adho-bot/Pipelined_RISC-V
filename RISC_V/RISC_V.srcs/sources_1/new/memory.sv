@@ -35,7 +35,11 @@ module memory (
     output logic        WD3_en_M_o, 
     output logic [4:0]  A3_addr_M_o,
     
-    output logic [31:0] data_read_M_o
+    output logic [31:0] data_read_M_o,
+    
+    //Hazard
+    output logic [31:0] ALU_FWD_M_o
+    
 );
 
 
@@ -45,18 +49,16 @@ module memory (
     assign mem_rd_M_o = mem_rd_M_i;
     assign mem_wr_M_o = mem_wr_M_i;
     
-    //Pipeline logic
+    //Hazard forwarding
+    assign ALU_FWD_M_o = ALU_M_i;
     
+    //Pipeline logic
     always_ff @(posedge clk) begin
-    PC_cur_M_o <= PC_cur_M_i;
-    ALU_M_o <= ALU_M_i;
-    data_sel_M_o <= data_sel_M_i;
-    WD3_en_M_o <= WD3_en_M_i;
-    A3_addr_M_o <= A3_addr_M_i;
-    data_read_M_o <= data_read_M_i;
-    end 
-
-
-
-
+            PC_cur_M_o <= PC_cur_M_i;
+            ALU_M_o <= ALU_M_i;
+            data_sel_M_o <= data_sel_M_i;
+            WD3_en_M_o <= WD3_en_M_i;
+            A3_addr_M_o <= A3_addr_M_i;
+            data_read_M_o <= data_read_M_i;
+    end
 endmodule
