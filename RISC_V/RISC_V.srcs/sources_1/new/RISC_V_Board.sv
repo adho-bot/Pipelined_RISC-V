@@ -1,14 +1,18 @@
 
 
 module RISC_V_Board(
-    input clk,   //need to change to fit constraints later. right now i need to do verification
-    input rst
+    input logic CLK_50MHZ_R,  //need to change to fit constraints later. right now i need to do verification
+//    input logic rst
+
+    output logic debug_clk 
 
     );
     
 /*==================================================*/    
 /*              logic instantiation                 */
 /*==================================================*/     
+    
+logic rst, locked, clk;    
     
 logic [31:0] instr_l;          // Instruction from instruction memory
 logic [31:0] instr_address_o;         // PC address to instruction memory
@@ -24,8 +28,26 @@ logic [31:0] address_M_l;      // Address for data memory access
 logic [1:0] RD1_sel_l;  
 logic [1:0] RD2_sel_l;  
 logic       flush_E_l;  
-logic       stall_D_l;      
+logic       stall_D_l; 
+logic       stall_en_l;
     
+    
+logic [31:0] instr_DH_o, instr_FH_o;    
+    
+//debug
+assign debug_clk = clk;    
+    
+clk_wiz_0 clk_inst
+   (
+    // Clock out ports
+    .clk_out1(clk),     // output clk_out1
+    // Status and control signals
+    .locked(locked),       // output locked
+   // Clock in ports
+    .clk_in1(CLK_50MHZ_R)      // input clk_in1
+);    
+    
+assign rst = !locked;
     
 RISC_V_top risc_v_top_inst (
     // Global signals
@@ -50,7 +72,7 @@ RISC_V_top risc_v_top_inst (
     .RD2_sel_i(RD2_sel_l),  
     .flush_E_i(flush_E_l),  
     .stall_D_i(stall_D_l),
-    .stall_en_o(stall_en_1)  
+    .stall_en_o(stall_en_l)  
 );
     
 instruction_memory instruction_memory_inst(

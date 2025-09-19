@@ -9,7 +9,7 @@ module Data_hazard(
     input logic [6:0] next_instr_op_i,   // next instruction opcode (in Decode)
     
     input logic [6:0] prev_instr_op_i,   // previous instruction opcode (in Execute)
-    input logic [4:0] prev_instr_rd_i,   // previous instruction destination register
+    input logic [4:0] prev_instr_rd_i,   // previous instruction destination register (in Execute)
     
     input logic       stall_en_i,       // To check if lw is in action
         
